@@ -1,0 +1,6 @@
+name: mruby-lockfile
+description: Lockfile class
+author: Uchio Kondo
+website: https://github.com/udzura/mruby-lockfile
+protocol: git
+repository: https://github.com/udzura/mruby-lockfile.git
