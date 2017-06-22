@@ -2,16 +2,20 @@
 ## Lockfile Test
 ##
 
-assert("Lockfile#hello") do
-  t = Lockfile.new "hello"
-  assert_equal("hello", t.hello)
+assert("Lockfile.new") do
+  system "mkdir -p ./tmp"
+
+  t = Lockfile.new "./tmp/test001.lock"
+  assert_equal(Lockfile, t.class)
+
+  system "rm -f ./tmp/test001.lock"
 end
 
-assert("Lockfile#bye") do
-  t = Lockfile.new "hello"
-  assert_equal("hello bye", t.bye)
-end
+assert("Lockfile#lock") do
+  system "mkdir -p ./tmp"
 
-assert("Lockfile.hi") do
-  assert_equal("hi!!", Lockfile.hi)
+  t = Lockfile.new "./tmp/test001.lock"
+  assert_true(t.lock)
+
+  system "rm -f ./tmp/test001.lock"
 end

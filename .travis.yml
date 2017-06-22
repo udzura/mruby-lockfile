@@ -5,10 +5,6 @@ compiler:
   - clang
 env:
   - MRUBY_VERSION=master
-  #- MRUBY_VERSION=1.3.0
-# matrix:
-#   allow_failures:
-#     - env: MRUBY_VERSION=master
 branches:
   only:
     - master
@@ -19,6 +15,9 @@ addons:
       - bison
       - git
       - gperf
-
 script:
   - rake test
+
+notifications:
+  slack:
+    secure: nxLZ+d6AIRdlmqzl9XKMKsbwmDeXHfKH3w0hB3dYQvlECeyOxDgMmFMYnA6Yn1Zb99sfVtUfic88Y2X/ZVwPQi2oPGx2IurPuZW0oxjjjf2fAE3XNWU8PT4kzh07ybBostyJgtLMEDw2dD1pfrMUXoY02dHZoaeaQuL9x0iBtYJbbI3ylNx4GUDipXlL4xvGiD3LDWGbYhyC2dn34niS0bFtbKTite/bKfZRkaxqinr+mIfoHS8E/AIBginThwCTN6y2fme4+xWG2NhkQqw7iWuOMopVmIYPABZG8NqnD2AkCPuLBN8PRbI+MkPOGryNgzomHfejL9i+KnnynVokGAapZvqqdbtfbhycKbiXv87Sp5Bg8+p9SlmVJgZmpfRqIshPTls86Hq5anF2d+NJGw4ayG422bKT/Bp5HbxUe+3a4WLVNozcSU/nOeUUSwUZTMuT/UjMo8RdDnNLAbO7XTgKoo38nmwk6IXV/C/yTsXhJCsrhyTY/8Ft9zNXGPvCBy/+PaXFVMaeLBB95XeHEmWPLMfreLCEzM1ebQTII8kTN+O8YxnAq3HR+mikTyF9gJ82xkGWpzL0mfbfVsmnaiCa8/4MXh8jzTCeKZVbJqWQsgsps/ZFfmkiBsPh9014A/8Nz2ACiw6D9e67W+gpzVlqUmLUxmfv/eEsRRREUI0=

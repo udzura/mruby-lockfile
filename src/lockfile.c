@@ -6,66 +6,85 @@
 ** See Copyright Notice in LICENSE
 */
 
-#include "mruby.h"
-#include "mruby/data.h"
+#include <fcntl.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <mruby.h>
+#include <mruby/class.h>
+#include <mruby/data.h>
+#include <mruby/error.h>
+
 #include "mrb_lockfile.h"
 
 #define DONE mrb_gc_arena_restore(mrb, 0);
 
 typedef struct {
-  char *str;
-  int len;
+  char *path;
+  int fd;
 } mrb_lockfile_data;
 
+void mrb_lockfile_free(mrb_state *mrb, void *p)
+{
+  mrb_lockfile_data *d = (mrb_lockfile_data *)p;
+  /* close(d->fd); */
+  mrb_free(mrb, d->path);
+  mrb_free(mrb, d);
+}
+
 static const struct mrb_data_type mrb_lockfile_data_type = {
-  "mrb_lockfile_data", mrb_free,
+    "mrb_lockfile_data", mrb_lockfile_free,
 };
 
 static mrb_value mrb_lockfile_init(mrb_state *mrb, mrb_value self)
 {
   mrb_lockfile_data *data;
   char *str;
-  int len;
+  int len, mode = 0666;
 
-  data = (mrb_lockfile_data *)DATA_PTR(self);
-  if (data) {
-    mrb_free(mrb, data);
-  }
   DATA_TYPE(self) = &mrb_lockfile_data_type;
-  DATA_PTR(self) = NULL;
-
-  mrb_get_args(mrb, "s", &str, &len);
+  mrb_get_args(mrb, "s|i", &str, &len, &mode);
   data = (mrb_lockfile_data *)mrb_malloc(mrb, sizeof(mrb_lockfile_data));
-  data->str = str;
-  data->len = len;
+  data->path = mrb_malloc(mrb, len + 1);
+  strncpy(data->path, str, (size_t)(len + 1));
+  data->fd = open(data->path, O_WRONLY | O_CREAT | O_CLOEXEC | O_NONBLOCK, (mode_t)mode);
+  if (data->fd < 0) {
+    mrb_sys_fail(mrb, "initial open");
+  }
+
   DATA_PTR(self) = data;
 
   return self;
 }
 
-static mrb_value mrb_lockfile_hello(mrb_state *mrb, mrb_value self)
+static mrb_value mrb_lockfile_do_lock(mrb_state *mrb, mrb_value self)
 {
+  struct flock f = {
+      .l_type = F_WRLCK, .l_whence = SEEK_SET, .l_start = 0, .l_len = 0,
+  };
   mrb_lockfile_data *data = DATA_PTR(self);
+  if (fcntl(data->fd, F_SETLK, &f) < 0) {
+    mrb_raise(mrb, E_RUNTIME_ERROR, "cannot set lock");
+  }
+  if (futimens(data->fd, NULL) < 0) {
+    mrb_warn(mrb, "futimens was failed but skip...");
+  }
 
-  return mrb_str_new(mrb, data->str, data->len);
-}
-
-static mrb_value mrb_lockfile_hi(mrb_state *mrb, mrb_value self)
-{
-  return mrb_str_new_cstr(mrb, "hi!!");
+  return mrb_true_value();
 }
 
 void mrb_mruby_lockfile_gem_init(mrb_state *mrb)
 {
-    struct RClass *lockfile;
-    lockfile = mrb_define_class(mrb, "Lockfile", mrb->object_class);
-    mrb_define_method(mrb, lockfile, "initialize", mrb_lockfile_init, MRB_ARGS_REQ(1));
-    mrb_define_method(mrb, lockfile, "hello", mrb_lockfile_hello, MRB_ARGS_NONE());
-    mrb_define_class_method(mrb, lockfile, "hi", mrb_lockfile_hi, MRB_ARGS_NONE());
-    DONE;
+  struct RClass *lockfile;
+  lockfile = mrb_define_class(mrb, "Lockfile", mrb->object_class);
+  MRB_SET_INSTANCE_TT(lockfile, MRB_TT_DATA);
+  mrb_define_method(mrb, lockfile, "initialize", mrb_lockfile_init, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, lockfile, "lock", mrb_lockfile_do_lock, MRB_ARGS_NONE());
+  DONE;
 }
 
 void mrb_mruby_lockfile_gem_final(mrb_state *mrb)
 {
 }
-
