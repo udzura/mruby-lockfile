@@ -1,7 +1,3 @@
-##
-## Lockfile Test
-##
-
 assert("Lockfile.new") do
   system "mkdir -p ./tmp"
 

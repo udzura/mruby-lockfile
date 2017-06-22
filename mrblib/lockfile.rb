@@ -28,3 +28,26 @@ class Lockfile
     end
   end
 end
+
+class Pidfile < Lockfile
+  def self.create(path)
+    p = new(path)
+    p.lock
+    p.write
+    return p
+  end
+
+  def self.trycreate(path)
+    p = new(path)
+    if p.trylock
+      p.write
+      return p
+    else
+      return false
+    end
+  end
+
+  def self.pidof(path)
+    new(path).pid
+  end
+end
