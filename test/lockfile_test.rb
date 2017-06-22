@@ -60,3 +60,13 @@ assert("Lockfile#trylock") do
 
   system "rm -f ./tmp/test010.lock"
 end
+
+assert("Lockfile.exist?") do
+  system "mkdir -p ./tmp"
+  assert_false(Lockfile.exist? "./tmp/test011.lock")
+
+  t = Lockfile.new "./tmp/test011.lock"
+  assert_true(Lockfile.exist? "./tmp/test011.lock")
+
+  system "rm -f ./tmp/test011.lock"
+end

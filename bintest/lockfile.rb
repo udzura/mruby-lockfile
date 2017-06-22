@@ -40,3 +40,15 @@ assert('trylock output') do
   system "killall mruby"
   system "rm -f './tmp/test103.lock'"
 end
+
+assert('lockwait with unlock') do
+  system "mkdir -p tmp"
+  system %Q(#{BIN_PATH} -e "l = Lockfile.lock './tmp/test104.lock'; sleep 1; l.unlock; loop {}" &)
+  sleep 0.5
+  output, err, status = Open3.capture3(BIN_PATH, "-e", "Lockfile.lockwait './tmp/test104.lock'")
+
+  assert_true status.success?
+
+  system "killall mruby"
+  system "rm -f './tmp/test102.lock'"
+end
