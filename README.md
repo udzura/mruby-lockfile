@@ -1,27 +1,42 @@
 # mruby-lockfile   [![Build Status](https://travis-ci.org/udzura/mruby-lockfile.svg?branch=master)](https://travis-ci.org/udzura/mruby-lockfile)
-Lockfile class
+
+File-based lock utilities.
+
+* `Lockfile` by `fnctl(2)`
+* `Pidfile` [WIP]
+
 ## install by mrbgems
-- add conf.gem line to `build_config.rb`
+
+Add conf.gem line to `build_config.rb`
 
 ```ruby
 MRuby::Build.new do |conf|
-
-    # ... (snip) ...
-
-    conf.gem :github => 'udzura/mruby-lockfile'
+  conf.gem github: 'udzura/mruby-lockfile'
 end
 ```
+
 ## example
+
 ```ruby
-p Lockfile.hi
-#=> "hi!!"
-t = Lockfile.new "hello"
-p t.hello
-#=> "hello"
-p t.bye
-#=> "hello bye"
+l = Lockfile.new('/var/run/test.lock')
+l.lock
+# If you want to unlock
+l.unlock
+
+## In another process:
+l = Lockfile.new('/var/run/test.lock')
+l.lock #=> Exception!
+
+l.trylock #=> false if failed
+
+l.lockwait # Block until lock is released
+# ...
 ```
 
+Please see tests.
+
 ## License
-under the MIT License:
+
+Under the MIT License:
+
 - see LICENSE file
