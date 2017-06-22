@@ -30,9 +30,13 @@ typedef struct {
 void mrb_lockfile_free(mrb_state *mrb, void *p)
 {
   mrb_lockfile_data *d = (mrb_lockfile_data *)p;
-  /* close(d->fd); */
-  mrb_free(mrb, d->path);
-  mrb_free(mrb, d);
+  if (d) {
+    if (d->fd > 0)
+      close(d->fd);
+    if (d->path)
+      mrb_free(mrb, d->path);
+    mrb_free(mrb, d);
+  }
 }
 
 static const struct mrb_data_type mrb_lockfile_data_type = {
