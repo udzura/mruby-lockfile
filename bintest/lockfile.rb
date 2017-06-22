@@ -5,7 +5,7 @@ BIN_PATH = File.join(File.dirname(__FILE__), "../mruby/bin/mruby") unless define
 assert('lock from another process') do
   system "mkdir -p tmp"
   system %Q(#{BIN_PATH} -e "Lockfile.lock './tmp/test101.lock'; loop {}" &)
-  sleep 0.5
+  sleep 0.01
   output, err, status = Open3.capture3(BIN_PATH, "-e", "Lockfile.lock './tmp/test101.lock'")
 
   assert_false status.success?
@@ -18,7 +18,7 @@ end
 assert('lockwait for another lock released') do
   system "mkdir -p tmp"
   system %Q(#{BIN_PATH} -e "Lockfile.lock './tmp/test102.lock'; sleep 1" &)
-  sleep 0.5
+  sleep 0.01
   output, err, status = Open3.capture3(BIN_PATH, "-e", "Lockfile.lockwait './tmp/test102.lock'")
 
   assert_true status.success?
@@ -33,7 +33,7 @@ assert('trylock output') do
   assert_equal "true", output.chomp
 
   system %Q(#{BIN_PATH} -e "Lockfile.lock './tmp/test103.lock'; loop {}" &)
-  sleep 0.5
+  sleep 0.01
   output, err, status = Open3.capture3(BIN_PATH, "-e", "l = Lockfile.new './tmp/test103.lock'; puts l.trylock.to_s")
   assert_equal "false", output.chomp
 
@@ -43,8 +43,8 @@ end
 
 assert('lockwait with unlock') do
   system "mkdir -p tmp"
-  system %Q(#{BIN_PATH} -e "l = Lockfile.lock './tmp/test104.lock'; sleep 1; l.unlock; loop {}" &)
-  sleep 0.5
+  system %Q(#{BIN_PATH} -e "l = Lockfile.lock './tmp/test104.lock'; usleep 20*1000; l.unlock; loop {}" &)
+  sleep 0.01
   output, err, status = Open3.capture3(BIN_PATH, "-e", "Lockfile.lockwait './tmp/test104.lock'")
 
   assert_true status.success?
@@ -56,7 +56,7 @@ end
 assert('get pid of locker') do
   system "mkdir -p tmp"
   system %Q(#{BIN_PATH} -e "Lockfile.lock './tmp/test105.lock'; loop {}" &)
-  sleep 0.5
+  sleep 0.01
   output, err, status = Open3.capture3(BIN_PATH, "-e", "p Lockfile.new('./tmp/test105.lock').locking_pid")
 
   assert_true output.to_i > 0
