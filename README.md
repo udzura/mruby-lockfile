@@ -33,6 +33,16 @@ l.lockwait # Block until lock is released
 # ...
 ```
 
+```ruby
+Pidfile.create '/var/run/foobar.pid'
+# => This creates file with getpid(), with process-level lock!
+
+## In another process:
+Pidfile.create '/var/run/foobar.pid'
+# => This will be failed
+# This will succeed after the process above died
+```
+
 Please see tests.
 
 ## Performance
