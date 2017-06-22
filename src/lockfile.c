@@ -73,6 +73,13 @@ static mrb_value mrb_lockfile_do_lock(mrb_state *mrb, mrb_value self)
   if (fcntl(data->fd, F_SETLK, &f) < 0) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "cannot set lock");
   }
+
+  return mrb_true_value();
+}
+
+static mrb_value mrb_lockfile_utime(mrb_state *mrb, mrb_value self)
+{
+  mrb_lockfile_data *data = DATA_PTR(self);
   if (futimens(data->fd, NULL) < 0) {
     mrb_warn(mrb, "futimens was failed but skip...");
   }
@@ -93,9 +100,6 @@ static mrb_value mrb_lockfile_lockwait(mrb_state *mrb, mrb_value self)
       mrb_raise(mrb, E_RUNTIME_ERROR, "deadlock detected");
     else
       mrb_raise(mrb, E_RUNTIME_ERROR, "cannot set lock anyway");
-  }
-  if (futimens(data->fd, NULL) < 0) {
-    mrb_warn(mrb, "futimens was failed but skip...");
   }
 
   return mrb_true_value();
@@ -172,6 +176,7 @@ void mrb_mruby_lockfile_gem_init(mrb_state *mrb)
   mrb_define_method(mrb, lockfile, "locked?", mrb_lockfile_is_locked, MRB_ARGS_NONE());
   mrb_define_method(mrb, lockfile, "unlock", mrb_lockfile_do_unlock, MRB_ARGS_NONE());
   mrb_define_method(mrb, lockfile, "trylock", mrb_lockfile_trylock, MRB_ARGS_NONE());
+  mrb_define_method(mrb, lockfile, "utime", mrb_lockfile_utime, MRB_ARGS_NONE());
 
   mrb_define_class_method(mrb, lockfile, "exist?", mrb_lockfile_exists, MRB_ARGS_REQ(1));
 
