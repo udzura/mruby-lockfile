@@ -50,5 +50,5 @@ assert('lockwait with unlock') do
   assert_true status.success?
 
   system "killall mruby"
-  system "rm -f './tmp/test102.lock'"
+  system "rm -f './tmp/test104.lock'"
 end
