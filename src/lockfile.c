@@ -105,21 +105,32 @@ static mrb_value mrb_lockfile_lockwait(mrb_state *mrb, mrb_value self)
   return mrb_true_value();
 }
 
-static int mrb__file_is_locked(mrb_state *mrb, int fd)
+static void mrb__get_flock(mrb_state *mrb, int fd, struct flock *f)
 {
-  struct flock f = {
-      .l_type = 0,
-  };
-  if (fcntl(fd, F_GETLK, &f) < 0) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "cannot get lock info");
+  if (fcntl(fd, F_GETLK, f) < 0) {
+    if (errno != EACCES && errno != EAGAIN)
+      mrb_raise(mrb, E_RUNTIME_ERROR, "cannot get lock info");
   }
-  return (f.l_type != F_UNLCK);
 }
 
 static mrb_value mrb_lockfile_is_locked(mrb_state *mrb, mrb_value self)
 {
+  struct flock f = {.l_type = 0};
   mrb_lockfile_data *data = DATA_PTR(self);
-  return mrb_bool_value((mrb_bool)mrb__file_is_locked(mrb, data->fd));
+  mrb__get_flock(mrb, data->fd, &f);
+  return mrb_bool_value((mrb_bool)(f.l_type != F_UNLCK));
+}
+
+static mrb_value mrb_lockfile_locking_pid(mrb_state *mrb, mrb_value self)
+{
+  struct flock f = {.l_type = 0};
+  mrb_lockfile_data *data = DATA_PTR(self);
+  mrb__get_flock(mrb, data->fd, &f);
+  if (f.l_type != F_UNLCK) {
+    return mrb_fixnum_value(f.l_pid);
+  } else {
+    return mrb_nil_value();
+  }
 }
 
 static mrb_value mrb_lockfile_exists(mrb_state *mrb, mrb_value self)
@@ -177,6 +188,7 @@ void mrb_mruby_lockfile_gem_init(mrb_state *mrb)
   mrb_define_method(mrb, lockfile, "unlock", mrb_lockfile_do_unlock, MRB_ARGS_NONE());
   mrb_define_method(mrb, lockfile, "trylock", mrb_lockfile_trylock, MRB_ARGS_NONE());
   mrb_define_method(mrb, lockfile, "utime", mrb_lockfile_utime, MRB_ARGS_NONE());
+  mrb_define_method(mrb, lockfile, "locking_pid", mrb_lockfile_locking_pid, MRB_ARGS_NONE());
 
   mrb_define_class_method(mrb, lockfile, "exist?", mrb_lockfile_exists, MRB_ARGS_REQ(1));
 

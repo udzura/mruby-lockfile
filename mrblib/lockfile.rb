@@ -5,6 +5,14 @@ class Lockfile
     return l
   end
 
+  def self.locked?(path)
+    new(path).locked?
+  end
+
+  def self.lockable?(path)
+    !locked?(path)
+  end
+
   def self.lockwait(path)
     l = new(path)
     l.lockwait

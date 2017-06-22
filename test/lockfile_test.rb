@@ -70,3 +70,13 @@ assert("Lockfile.exist?") do
 
   system "rm -f ./tmp/test011.lock"
 end
+
+assert("Lockfile#locking_pid") do
+  system "mkdir -p ./tmp"
+  t = Lockfile.new "./tmp/test012.lock"
+  assert_true(t.lock)
+  # Cannot get pid from locking process
+  assert_nil(t.locking_pid)
+
+  system "rm -f ./tmp/test012.lock"
+end

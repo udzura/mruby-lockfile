@@ -52,3 +52,15 @@ assert('lockwait with unlock') do
   system "killall mruby"
   system "rm -f './tmp/test104.lock'"
 end
+
+assert('get pid of locker') do
+  system "mkdir -p tmp"
+  system %Q(#{BIN_PATH} -e "Lockfile.lock './tmp/test105.lock'; loop {}" &)
+  sleep 0.5
+  output, err, status = Open3.capture3(BIN_PATH, "-e", "p Lockfile.new('./tmp/test105.lock').locking_pid")
+
+  assert_true output.to_i > 0
+
+  system "killall mruby"
+  system "rm -f './tmp/test105.lock'"
+end
