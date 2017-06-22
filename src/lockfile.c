@@ -6,6 +6,7 @@
 ** See Copyright Notice in LICENSE
 */
 
+#include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -75,6 +76,26 @@ static mrb_value mrb_lockfile_do_lock(mrb_state *mrb, mrb_value self)
   return mrb_true_value();
 }
 
+static mrb_value mrb_lockfile_trylock(mrb_state *mrb, mrb_value self)
+{
+  struct flock f = {
+      .l_type = F_WRLCK, .l_whence = SEEK_SET, .l_start = 0, .l_len = 0,
+  };
+  mrb_lockfile_data *data = DATA_PTR(self);
+  if (fcntl(data->fd, F_SETLK, &f) < 0) {
+    if (errno == EACCES || errno == EAGAIN) {
+      return mrb_false_value();
+    }
+
+    mrb_raise(mrb, E_RUNTIME_ERROR, "unexpected error when locking");
+  }
+  if (futimens(data->fd, NULL) < 0) {
+    mrb_warn(mrb, "futimens was failed but skip...");
+  }
+
+  return mrb_true_value();
+}
+
 void mrb_mruby_lockfile_gem_init(mrb_state *mrb)
 {
   struct RClass *lockfile;
@@ -82,6 +103,7 @@ void mrb_mruby_lockfile_gem_init(mrb_state *mrb)
   MRB_SET_INSTANCE_TT(lockfile, MRB_TT_DATA);
   mrb_define_method(mrb, lockfile, "initialize", mrb_lockfile_init, MRB_ARGS_REQ(1));
   mrb_define_method(mrb, lockfile, "lock", mrb_lockfile_do_lock, MRB_ARGS_NONE());
+  mrb_define_method(mrb, lockfile, "trylock", mrb_lockfile_trylock, MRB_ARGS_NONE());
   DONE;
 }
 
