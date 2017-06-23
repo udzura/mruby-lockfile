@@ -2,6 +2,8 @@ require 'open3'
 
 BIN_PATH = File.join(File.dirname(__FILE__), "../mruby/bin/mruby") unless defined?(BIN_PATH)
 
+if File.exist? BIN_PATH # Only in mgem's CI
+
 assert('lock from another process') do
   system "mkdir -p tmp"
   system %Q(#{BIN_PATH} -e "Lockfile.lock './tmp/test101.lock'; loop {}" &)
@@ -63,4 +65,6 @@ assert('get pid of locker') do
 
   system "killall mruby"
   system "rm -f './tmp/test105.lock'"
+end
+
 end

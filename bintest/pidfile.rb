@@ -2,6 +2,8 @@ require 'open3'
 
 BIN_PATH = File.join(File.dirname(__FILE__), "../mruby/bin/mruby") unless defined?(BIN_PATH)
 
+if File.exist? BIN_PATH # Only in mgem's CI
+
 assert('pid lock from another process') do
   system "mkdir -p tmp"
   system %Q(#{BIN_PATH} -e "Pidfile.create './tmp/test101.pid'; loop {}" &)
@@ -16,4 +18,6 @@ assert('pid lock from another process') do
 
   system "killall mruby"
   system "rm -f './tmp/test101.pid'"
+end
+
 end
