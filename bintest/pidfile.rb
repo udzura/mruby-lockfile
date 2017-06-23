@@ -1,14 +1,14 @@
 require 'open3'
 
-MRUBY_BIN_PATH = File.join(File.dirname(__FILE__), "../mruby/bin/mruby") unless defined?(BIN_PATH)
+MRUBY_BIN_PATH = File.join(File.dirname(__FILE__), "../mruby/bin/mruby") unless defined?(MRUBY_BIN_PATH)
 
 if File.exist? MRUBY_BIN_PATH # Only in mgem's CI
 
 assert('pid lock from another process') do
   system "mkdir -p tmp"
-  system %Q(#{BIN_PATH} -e "Pidfile.create './tmp/test101.pid'; loop {}" &)
+  system %Q(#{MRUBY_BIN_PATH} -e "Pidfile.create './tmp/test101.pid'; loop {}" &)
   sleep 0.01
-  output, err, status = Open3.capture3(BIN_PATH, "-e", "Pidfile.create './tmp/test101.pid'")
+  output, err, status = Open3.capture3(MRUBY_BIN_PATH, "-e", "Pidfile.create './tmp/test101.pid'")
 
   assert_false status.success?
   assert_true err.include? 'cannot set lock'
