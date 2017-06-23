@@ -1,8 +1,8 @@
 require 'open3'
 
-BIN_PATH = File.join(File.dirname(__FILE__), "../mruby/bin/mruby") unless defined?(BIN_PATH)
+MRUBY_BIN_PATH = File.join(File.dirname(__FILE__), "../mruby/bin/mruby") unless defined?(BIN_PATH)
 
-if File.exist? BIN_PATH # Only in mgem's CI
+if File.exist? MRUBY_BIN_PATH # Only in mgem's CI
 
 assert('lock from another process') do
   system "mkdir -p tmp"
