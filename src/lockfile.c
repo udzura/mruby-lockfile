@@ -139,7 +139,7 @@ static mrb_value mrb_lockfile_locking_pid(mrb_state *mrb, mrb_value self)
 static mrb_value mrb_lockfile_path(mrb_state *mrb, mrb_value self)
 {
   mrb_lockfile_data *data = DATA_PTR(self);
-  return mrb_str_new_cstr(data->path);
+  return mrb_str_new_cstr(mrb, data->path);
 }
 
 static mrb_value mrb_lockfile_exists(mrb_state *mrb, mrb_value self)
