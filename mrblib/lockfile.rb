@@ -27,6 +27,10 @@ class Lockfile
       return false
     end
   end
+
+  def inspect
+    "#<Lockfile path=#{self.path}>"
+  end
 end
 
 class Pidfile < Lockfile
@@ -49,5 +53,9 @@ class Pidfile < Lockfile
 
   def self.pidof(path)
     new(path).pid
+  end
+
+  def inspect
+    "#<Pidfile path=#{self.path}>"
   end
 end
