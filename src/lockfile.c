@@ -136,6 +136,12 @@ static mrb_value mrb_lockfile_locking_pid(mrb_state *mrb, mrb_value self)
   }
 }
 
+static mrb_value mrb_lockfile_path(mrb_state *mrb, mrb_value self)
+{
+  mrb_lockfile_data *data = DATA_PTR(self);
+  return mrb_str_new_cstr(data->path);
+}
+
 static mrb_value mrb_lockfile_exists(mrb_state *mrb, mrb_value self)
 {
   char *str;
@@ -260,6 +266,7 @@ void mrb_mruby_lockfile_gem_init(mrb_state *mrb)
   mrb_define_method(mrb, lockfile, "trylock", mrb_lockfile_trylock, MRB_ARGS_NONE());
   mrb_define_method(mrb, lockfile, "utime", mrb_lockfile_utime, MRB_ARGS_NONE());
   mrb_define_method(mrb, lockfile, "locking_pid", mrb_lockfile_locking_pid, MRB_ARGS_NONE());
+  mrb_define_method(mrb, lockfile, "path", mrb_lockfile_path, MRB_ARGS_NONE());
 
   mrb_define_class_method(mrb, lockfile, "exist?", mrb_lockfile_exists, MRB_ARGS_REQ(1));
 
