@@ -49,13 +49,13 @@ static mrb_value mrb_lockfile_init(mrb_state *mrb, mrb_value self)
 {
   mrb_lockfile_data *data;
   char *str;
-  int len, mode = 0666;
+  mrb_int len, mode = (mrb_int)0666;
 
   DATA_TYPE(self) = &mrb_lockfile_data_type;
   mrb_get_args(mrb, "s|i", &str, &len, &mode);
   data = (mrb_lockfile_data *)mrb_malloc(mrb, sizeof(mrb_lockfile_data));
-  data->path = mrb_malloc(mrb, len + 1);
-  strncpy(data->path, str, (size_t)(len + 1));
+  data->path = mrb_malloc(mrb, (size_t)len + 1);
+  strncpy(data->path, str, (size_t)len + 1);
   data->fd = open(data->path, O_WRONLY | O_CREAT | O_CLOEXEC | O_NONBLOCK, (mode_t)mode);
   if (data->fd < 0) {
     mrb_sys_fail(mrb, "initial open");
