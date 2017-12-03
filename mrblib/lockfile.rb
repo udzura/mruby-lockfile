@@ -58,4 +58,9 @@ class Pidfile < Lockfile
   def inspect
     "#<Pidfile path=#{self.path}>"
   end
+
+  def remove
+    ::File.delete(self.path) if ::File.exists?(self.path)
+  end
+
 end

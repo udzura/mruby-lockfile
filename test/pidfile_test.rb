@@ -20,3 +20,12 @@ assert("Pidfile.create") do
 
   system "rm -f ./tmp/test001.pid"
 end
+
+assert("Pidfile.delete") do
+  system "mkdir -p ./tmp"
+
+  t = Pidfile.create "./tmp/test001.pid"
+  assert_true(::File.exists?("./tmp/test001.pid"))
+  t.remove
+  assert_false( ::File.exists?("./tmp/test001.pid"))
+end
